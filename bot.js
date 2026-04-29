@@ -9,7 +9,11 @@ try {
 } catch (err) {
     history = [];
 }
-
+const http = require('http');
+const PORT = process.env.PORT || 3000;
+http.createServer((req, res) => res.end('OK')).listen(PORT, () => {
+    console.log(`HTTP заглушка на порту ${PORT}`);
+});
 const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true });
 const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY;
 const MODEL = 'google/gemini-2.5-flash';
