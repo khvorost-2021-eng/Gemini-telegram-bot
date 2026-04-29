@@ -57,7 +57,7 @@ bot.on('message', async (msg) => {
     const answer = await askGroq(text);
 
     try {
-        await bot.sendMessage(chatId, answer);
+        await bot.sendMessage(chatId, answer, { parse_mode: 'HTML' });
     } catch (err) {
         await bot.sendMessage(chatId, answer);
     }
