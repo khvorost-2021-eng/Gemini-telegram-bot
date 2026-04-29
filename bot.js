@@ -4,7 +4,7 @@ const http = require('http');
 const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true });
 const GROQ_KEY = process.env.GROQ_KEY;
 
-async function askGroq(question) {
+async function askGroq(messages) {
     try {
         const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
             method: 'POST',
@@ -13,17 +13,8 @@ async function askGroq(question) {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                model: 'llama-3.3-70b-versatile',
-                messages: [
-                    {
-                        role: 'system',
-                        content: 'Ты — полезный ассистент. Отвечай на русском языке. Без форматирования, чистым текстом. Не используй жирный, курсив, код и другие разметки.'
-                    },
-                    {
-                        role: 'user',
-                        content: question
-                    }
-                ]
+                model: 'meta-llama/llama-4-maverick-17b-128e-instruct',
+                messages: messages
             })
         });
 
@@ -43,12 +34,35 @@ async function askGroq(question) {
 
 bot.on('message', async (msg) => {
     const chatId = msg.chat.id;
-    const text = msg.text;
 
-    if (!text) return;
+    // Если есть фото
+    if (msg.photo) {
+        // Взять самое большое разрешение
+        const fileId = msg.photo[msg.photo.length - 1].file_id;
+        const fileUrl = await bot.getFileLink(fileId);
+        const caption = msg.caption || 'Что на этом изображении?';
 
-    const answer = await askGroq(text);
-    bot.sendMessage(chatId, answer);
+        const answer = await askGroq([
+            {
+                role: 'user',
+                content: [
+                    { type: 'text', text: caption },
+                    { type: 'image_url', image_url: { url: fileUrl } }
+                ]
+            }
+        ]);
+
+        bot.sendMessage(chatId, answer);
+        return;
+    }
+
+    // Если текст
+    if (msg.text) {
+        const answer = await askGroq([
+            { role: 'user', content: msg.text }
+        ]);
+        bot.sendMessage(chatId, answer);
+    }
 });
 
 console.log('🤖 Бот запущен');
