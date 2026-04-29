@@ -24,7 +24,7 @@ async function askGroq(question) {
                 messages: [
                     {
                         role: 'system',
-                        content: 'Ты — полезный ассистент. Всегда используй HTML-форматирование: <b>жирный</b> для важных слов, <code>код</code> для технических терминов, <i>курсив</i> для выделения. Отвечай на русском.'
+                        content: 'Ты — полезный ассистент. Можешь использовать HTML-форматирование (<b>, <i>, <code>) по желанию, если это уместно. Отвечай на русском.'
                     },
                     {
                         role: 'user',
@@ -57,7 +57,7 @@ bot.on('message', async (msg) => {
     const answer = await askGroq(text);
 
     try {
-        await bot.sendMessage(chatId, answer, { parse_mode: 'HTML' });
+        await bot.sendMessage(chatId, answer);
     } catch (err) {
         await bot.sendMessage(chatId, answer);
     }
