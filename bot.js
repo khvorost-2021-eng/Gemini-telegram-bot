@@ -16,7 +16,8 @@ async function askGemini(question) {
             },
             body: JSON.stringify({
                 model: MODEL,
-                messages: [{ role: 'user', content: question }]
+                messages: [{ role: 'user', content: question }],
+                max_tokens: 8000
             })
         });
 
