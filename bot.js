@@ -3,19 +3,18 @@ const http = require('http');
 require('dotenv').config();
 
 const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true });
-const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY;
-const MODEL = 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free';
+const DEEPSEEK_KEY = process.env.DEEPSEEK_KEY;
 
-async function askGemini(question) {
+async function askDeepSeek(question) {
     try {
-        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${OPENROUTER_KEY}`,
+                'Authorization': `Bearer ${DEEPSEEK_KEY}`,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                model: MODEL,
+                model: 'deepseek-chat',
                 messages: [
                     {
                         role: 'system',
@@ -25,8 +24,7 @@ async function askGemini(question) {
                         role: 'user',
                         content: question
                     }
-                ],
-                max_tokens: 8000
+                ]
             })
         });
 
@@ -36,7 +34,7 @@ async function askGemini(question) {
             return data.choices[0].message.content;
         }
 
-        console.error('OpenRouter ответил:', JSON.stringify(data));
+        console.error('DeepSeek ответил:', JSON.stringify(data));
         return 'Ошибка: нейросеть не ответила. ' + (data.error ? data.error.message : '');
     } catch (err) {
         console.error('Ошибка запроса:', err.message);
@@ -50,7 +48,7 @@ bot.on('message', async (msg) => {
 
     if (!text) return;
 
-    const answer = await askGemini(text);
+    const answer = await askDeepSeek(text);
 
     try {
         await bot.sendMessage(chatId, answer, { parse_mode: 'HTML' });
@@ -61,7 +59,6 @@ bot.on('message', async (msg) => {
 
 console.log('🤖 Бот запущен');
 
-// Фиктивный HTTP-сервер для Render
 const PORT = process.env.PORT || 3000;
 http.createServer((req, res) => res.end('OK')).listen(PORT, () => {
     console.log(`HTTP заглушка на порту ${PORT}`);
