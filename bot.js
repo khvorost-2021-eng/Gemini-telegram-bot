@@ -42,11 +42,12 @@ bot.on('message', async (msg) => {
     const text = msg.text;
 
     if (!text) return;
-
-    bot.sendMessage(chatId, 'Думаю...');
-
     const answer = await askGemini(text);
-    bot.sendMessage(chatId, answer);
+    try {
+        await bot.sendMessage(chatId, answer, { parse_mode: 'Markdown' });
+    } catch (err) {
+        await bot.sendMessage(chatId, answer);  // Без форматирования
+    }
 });
 
 console.log('🤖 Бот запущен');
