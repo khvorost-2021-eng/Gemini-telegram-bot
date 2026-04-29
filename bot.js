@@ -2,7 +2,13 @@ const TelegramBot = require('node-telegram-bot-api');
 const http = require('http');
 require('dotenv').config();
 
-const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true });
+const bot = new TelegramBot(process.env.BOT_TOKEN, {
+    polling: {
+        params: {
+            allowed_updates: ['message']
+        }
+    }
+});
 const GROQ_KEY = process.env.GROQ_KEY;
 
 async function askGroq(question) {
