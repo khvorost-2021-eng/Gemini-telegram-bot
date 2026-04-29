@@ -1,14 +1,7 @@
 const TelegramBot = require('node-telegram-bot-api');
 const http = require('http');
-require('dotenv').config();
 
-const bot = new TelegramBot(process.env.BOT_TOKEN, {
-    polling: {
-        params: {
-            allowed_updates: ['message']
-        }
-    }
-});
+const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true });
 const GROQ_KEY = process.env.GROQ_KEY;
 
 async function askGroq(question) {
@@ -24,9 +17,12 @@ async function askGroq(question) {
                 messages: [
                     {
                         role: 'system',
-                        content: 'Ты — полезный ассистент. Используй HTML для форматирования: <b>жирный</b>, <i>курсив</i>, <code>код</code>, <pre>блок кода</pre>, <a href="URL">ссылка</a>. Не используй таблицы, div, span, h1-h6. Отвечай на русском.'
+                        content: 'Ты — полезный ассистент. Отвечай на русском языке. Без форматирования, чистым текстом. Не используй жирный, курсив, код и другие разметки.'
                     },
-                    { role: 'user', content: question }
+                    {
+                        role: 'user',
+                        content: question
+                    }
                 ]
             })
         });
@@ -34,12 +30,7 @@ async function askGroq(question) {
         const data = await response.json();
 
         if (data && data.choices && data.choices[0] && data.choices[0].message) {
-            let answer = data.choices[0].message.content;
-            
-            // Удаляем все теги, кроме разрешённых в Telegram
-            answer = answer.replace(/<(?!\/?(b|i|code|pre|a|u|s)(\s|>))[^>]*>/g, '');
-            
-            return answer;
+            return data.choices[0].message.content;
         }
 
         console.error('Groq ответил:', JSON.stringify(data));
@@ -57,12 +48,7 @@ bot.on('message', async (msg) => {
     if (!text) return;
 
     const answer = await askGroq(text);
-
-    try {
-        await bot.sendMessage(chatId, answer, { parse_mode: 'HTML', disable_web_page_preview: true });
-    } catch (err) {
-        await bot.sendMessage(chatId, answer);
-    }
+    bot.sendMessage(chatId, answer);
 });
 
 console.log('🤖 Бот запущен');
