@@ -32,7 +32,15 @@ async function askGemini(question) {
     });
     
     const data = await response.json();
-    return data.choices[0].message.content;
+    
+    // Проверить, есть ли ответ
+    if (data.choices && data.choices.length > 0) {
+        return data.choices[0].message.content;
+    }
+    
+    // Если ответа нет — вернуть ошибку
+    console.error('Ответ OpenRouter:', JSON.stringify(data));
+    return 'Не удалось получить ответ от нейросети. Попробуй позже.';
 }
 
 bot.on('message', async (msg) => {
