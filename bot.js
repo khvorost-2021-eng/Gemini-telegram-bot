@@ -39,16 +39,22 @@ bot.on('message', async (msg) => {
     const chatId = msg.chat.id;
     const text = msg.text;
 
+    // 1. Сначала всегда сохраняем сообщение пользователя в историю
     history.push({
         from: msg.from.first_name,
         text: text,
         time: new Date().toISOString()
     });
-    fs.writeFile('history.json', JSON.stringify(history), () => {});    
+
+    // 2. Сохраняем файл (на случай, если ответ не придёт, сообщение уже записано)
+    fs.writeFile('history.json', JSON.stringify(history), () => {});
+
+    // 3. Отвечаем пользователю
     try {
         const answer = await askGemini(text);
         bot.sendMessage(chatId, answer);
     } catch (err) {
+        console.error('Ошибка при запросе к Gemini:', err); // Логируем для себя
         bot.sendMessage(chatId, 'Ошибка: ' + err.message);
     }
 });
