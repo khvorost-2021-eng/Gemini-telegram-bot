@@ -4,7 +4,7 @@ require('dotenv').config();
 
 const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true });
 const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY;
-const MODEL = 'meta-llama/llama-4-maverick:free';
+const MODEL = 'openai/gpt-3.5-turbo:free';
 
 async function askGemini(question) {
     try {
