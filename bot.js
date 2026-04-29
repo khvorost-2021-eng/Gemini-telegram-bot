@@ -34,16 +34,20 @@ async function askGemini(question) {
 bot.on('message', async (msg) => {
     const chatId = msg.chat.id;
     const text = msg.text;
-    
+
+    history.push({
+        from: msg.from.first_name,
+        text: text,
+        time: new Date().toISOString()
+    });
+    fs.writeFile('history.json', JSON.stringify(history), () => {});    
     bot.sendMessage(chatId, 'Думаю...');
-    
     try {
         const answer = await askGemini(text);
         bot.sendMessage(chatId, answer);
     } catch (err) {
         bot.sendMessage(chatId, 'Ошибка: ' + err.message);
     }
-    fs.writeFile('history.json', JSON.stringify(history), () => {});
 });
 
 console.log('🤖 Бот запущен');
