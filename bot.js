@@ -4,7 +4,7 @@ require('dotenv').config();
 
 const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true });
 const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY;
-const MODEL = 'mistralai/mistral-7b-instruct:free';
+const MODEL = 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free';
 
 async function askGemini(question) {
     try {
