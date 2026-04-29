@@ -16,19 +16,26 @@ async function askGemini(question) {
             },
             body: JSON.stringify({
                 model: MODEL,
-                messages: [{ role: 'user', content: question }],
+                messages: [
+                    {
+                        role: 'system',
+                        content: 'Ты — полезный ассистент. Всегда используй HTML-форматирование: <b>жирный</b> для важных слов, <code>код</code> для технических терминов, <i>курсив</i> для выделения. Отвечай на русском.'
+                    },
+                    {
+                        role: 'user',
+                        content: question
+                    }
+                ],
                 max_tokens: 8000
             })
         });
 
         const data = await response.json();
 
-        // Проверить, есть ли ответ
         if (data && data.choices && data.choices[0] && data.choices[0].message) {
             return data.choices[0].message.content;
         }
 
-        // Если ответа нет — показать, что вернул OpenRouter
         console.error('OpenRouter ответил:', JSON.stringify(data));
         return 'Ошибка: нейросеть не ответила. ' + (data.error ? data.error.message : '');
     } catch (err) {
@@ -42,11 +49,13 @@ bot.on('message', async (msg) => {
     const text = msg.text;
 
     if (!text) return;
+
     const answer = await askGemini(text);
+
     try {
-        await bot.sendMessage(chatId, answer, { parse_mode: 'MarkdownV2' });
+        await bot.sendMessage(chatId, answer, { parse_mode: 'HTML' });
     } catch (err) {
-        await bot.sendMessage(chatId, answer);  // Без форматирования
+        await bot.sendMessage(chatId, answer);
     }
 });
 
