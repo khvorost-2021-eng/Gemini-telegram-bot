@@ -4,7 +4,7 @@ require('dotenv').config();
 
 const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true });
 const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY;
-const MODEL = 'google/gemini-2.5-flash-lite';
+const MODEL = 'meta-llama/llama-4-maverick:free';
 
 async function askGemini(question) {
     try {
@@ -44,7 +44,7 @@ bot.on('message', async (msg) => {
     if (!text) return;
     const answer = await askGemini(text);
     try {
-        await bot.sendMessage(chatId, answer, { parse_mode: 'Markdown' });
+        await bot.sendMessage(chatId, answer, { parse_mode: 'MarkdownV2' });
     } catch (err) {
         await bot.sendMessage(chatId, answer);  // Без форматирования
     }
