@@ -45,7 +45,6 @@ bot.on('message', async (msg) => {
         time: new Date().toISOString()
     });
     fs.writeFile('history.json', JSON.stringify(history), () => {});    
-    bot.sendMessage(chatId, 'Думаю...');
     try {
         const answer = await askGemini(text);
         bot.sendMessage(chatId, answer);
