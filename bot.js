@@ -22,27 +22,42 @@ async function askGroq(question) {
 }
 
 async function askGeminiVision(fileUrl, caption) {
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${OPENROUTER_KEY}`,
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            model: 'google/gemini-2.5-flash-lite:free',
-            messages: [
-                {
-                    role: 'user',
-                    content: [
-                        { type: 'text', text: caption || 'Что на этом изображении?' },
-                        { type: 'image_url', image_url: { url: fileUrl } }
-                    ]
-                }
-            ]
-        })
-    });
-    const data = await response.json();
-    return data.choices[0].message.content;
+    try {
+        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${OPENROUTER_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                model: 'google/gemini-2.5-flash-lite:free',
+                max_tokens: 400, // Ограничиваем длину ответа, чтобы было быстрее
+                messages: [
+                    {
+                        role: 'user',
+                        content: [
+                            { type: 'text', text: caption || 'Опиши, что видишь на этом изображении кратко, на русском языке.' },
+                            { type: 'image_url', image_url: { url: fileUrl } }
+                        ]
+                    }
+                ]
+            })
+        });
+
+        const data = await response.json();
+        
+        // Проверяем, не вернул ли OpenRouter ошибку
+        if (data.error) {
+            console.error('OpenRouter ошибка:', data.error);
+            return 'Извини, не удалось обработать изображение. Ошибка: ' + data.error.message;
+        }
+
+        return data.choices[0].message.content;
+        
+    } catch (err) {
+        console.error('Ошибка при анализе фото:', err.message);
+        return 'Не удалось обработать изображение из-за технической ошибки.';
+    }
 }
 
 bot.on('message', async (msg) => {
