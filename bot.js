@@ -9,7 +9,7 @@ const bot = new TelegramBot(process.env.BOT_TOKEN, {
         }
     }
 });
-const GROK_KEY = process.env.GROK_KEY;
+const GROQ_KEY = process.env.GROQ_KEY;
 
 async function askGroq(question) {
     try {
