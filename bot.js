@@ -24,12 +24,9 @@ async function askGroq(question) {
                 messages: [
                     {
                         role: 'system',
-                        content: 'Ты — полезный ассистент. Можешь использовать HTML-форматирование (<b>, <i>, <code>) по желанию, если это уместно. Отвечай на русском.'
+                        content: 'Ты — полезный ассистент. Используй HTML для форматирования: <b>жирный</b>, <i>курсив</i>, <code>код</code>, <pre>блок кода</pre>, <a href="URL">ссылка</a>. Не используй таблицы, div, span, h1-h6. Отвечай на русском.'
                     },
-                    {
-                        role: 'user',
-                        content: question
-                    }
+                    { role: 'user', content: question }
                 ]
             })
         });
@@ -37,7 +34,12 @@ async function askGroq(question) {
         const data = await response.json();
 
         if (data && data.choices && data.choices[0] && data.choices[0].message) {
-            return data.choices[0].message.content;
+            let answer = data.choices[0].message.content;
+            
+            // Удаляем все теги, кроме разрешённых в Telegram
+            answer = answer.replace(/<(?!\/?(b|i|code|pre|a|u|s)(\s|>))[^>]*>/g, '');
+            
+            return answer;
         }
 
         console.error('Groq ответил:', JSON.stringify(data));
@@ -57,7 +59,7 @@ bot.on('message', async (msg) => {
     const answer = await askGroq(text);
 
     try {
-        await bot.sendMessage(chatId, answer, { parse_mode: 'HTML' });
+        await bot.sendMessage(chatId, answer, { parse_mode: 'HTML', disable_web_page_preview: true });
     } catch (err) {
         await bot.sendMessage(chatId, answer);
     }
