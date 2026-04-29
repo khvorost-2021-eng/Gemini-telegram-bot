@@ -3,18 +3,18 @@ const http = require('http');
 require('dotenv').config();
 
 const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true });
-const DEEPSEEK_KEY = process.env.DEEPSEEK_KEY;
+const GROQ_KEY = process.env.GROQ_KEY;
 
-async function askDeepSeek(question) {
+async function askGroq(question) {
     try {
-        const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${DEEPSEEK_KEY}`,
+                'Authorization': `Bearer ${GROQ_KEY}`,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                model: 'deepseek-chat',
+                model: 'llama-3.3-70b-versatile',
                 messages: [
                     {
                         role: 'system',
@@ -34,8 +34,8 @@ async function askDeepSeek(question) {
             return data.choices[0].message.content;
         }
 
-        console.error('DeepSeek ответил:', JSON.stringify(data));
-        return 'Ошибка: нейросеть не ответила. ' + (data.error ? data.error.message : '');
+        console.error('Groq ответил:', JSON.stringify(data));
+        return 'Ошибка: нейросеть не ответила.';
     } catch (err) {
         console.error('Ошибка запроса:', err.message);
         return 'Ошибка соединения с нейросетью.';
@@ -48,7 +48,7 @@ bot.on('message', async (msg) => {
 
     if (!text) return;
 
-    const answer = await askDeepSeek(text);
+    const answer = await askGroq(text);
 
     try {
         await bot.sendMessage(chatId, answer, { parse_mode: 'HTML' });
