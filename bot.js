@@ -8,9 +8,9 @@ const GROQ_KEY = process.env.GROQ_KEY;
 const userHistory = {};
 
 async function askGroq(chatId) {
-    // Системная инструкция + последние 10 сообщений
+    // Системная инструкция + последние 20 сообщений
     const messages = [
-        { role: 'system', content: 'Ты — полезный ассистент. Отвечай на русском языке. Помни, о чём вы говорили ранее.' },
+        { role: 'system', content: 'Ты — полезный ассистент. Отвечай на русском языке. Помни, о чём вы говорили ранее. Говори в мужском роде.' },
         ...userHistory[chatId]
     ];
 
@@ -54,9 +54,9 @@ bot.on('message', async (msg) => {
     // Добавить сообщение пользователя в историю
     userHistory[chatId].push({ role: 'user', content: text });
 
-    // Оставить только последние 10 сообщений
-    if (userHistory[chatId].length > 10) {
-        userHistory[chatId] = userHistory[chatId].slice(-10);
+    // Оставить только последние 20 сообщений
+    if (userHistory[chatId].length > 20) {
+        userHistory[chatId] = userHistory[chatId].slice(-20);
     }
 
     // Получить ответ от Groq
